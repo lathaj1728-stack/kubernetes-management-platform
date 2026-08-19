@@ -47,33 +47,34 @@ pipeline {
         }
 
         stage('Deploy to Kubernetes') {
-    steps {
-        sh '''
-            kubectl apply -f k8s/configmap.yaml --request-timeout=60s
-            kubectl apply -f k8s/secret.yaml --request-timeout=60s
-            kubectl apply -f k8s/service.yaml --request-timeout=60s
-            kubectl apply -f k8s/deployment.yaml --request-timeout=60s
+            steps {
+                sh '''
+                    kubectl apply -f k8s/configmap.yaml --request-timeout=60s
+                    kubectl apply -f k8s/secret.yaml --request-timeout=60s
+                    kubectl apply -f k8s/service.yaml --request-timeout=60s
+                    kubectl apply -f k8s/deployment.yaml --request-timeout=60s
 
-            kubectl set image deployment/myapp-deployment \
-              myapp=${IMAGE_NAME}:${IMAGE_TAG} \
-              -n production \
-              --request-timeout=60s
-        '''
-    }
-}
+                    kubectl set image deployment/myapp-deployment \
+                      myapp=${IMAGE_NAME}:${IMAGE_TAG} \
+                      -n production \
+                      --request-timeout=60s
+                '''
+            }
+        }
 
         stage('Verify Deployment') {
-    steps {
-        sh '''
-            kubectl rollout status deployment/myapp-deployment \
-              -n production \
-              --timeout=180s
+            steps {
+                sh '''
+                    kubectl rollout status deployment/myapp-deployment \
+                      -n production \
+                      --timeout=180s
 
-            kubectl get pods -n production --request-timeout=60s
-            kubectl get svc -n production --request-timeout=60s
-        '''
+                    kubectl get pods -n production --request-timeout=60s
+                    kubectl get svc -n production --request-timeout=60s
+                '''
+            }
+        }
     }
-}
 
     post {
         success {
